@@ -20,6 +20,7 @@ public class OptionsActivity extends Activity {
     Button retro;
 
     Button back;
+    Button play;
 
     SharedPreferences settings;
 
@@ -35,7 +36,9 @@ public class OptionsActivity extends Activity {
         colorful = findViewById(R.id.colorful);
         blacknwhite = findViewById(R.id.backnwhite);
         retro = findViewById(R.id.retro);
+
         back = findViewById(R.id.back);
+        play = findViewById(R.id.play);
 
         TextView difTittle = findViewById(R.id.difficulty);
         TextView theTittle = findViewById(R.id.theme);
@@ -135,6 +138,11 @@ public class OptionsActivity extends Activity {
         // Go back to main
         back.setOnClickListener(view ->{
             startActivity(new Intent(OptionsActivity.this, MainActivity.class));
+        });
+
+        // Go directly to play!
+        play.setOnClickListener(view ->{
+            startActivity(new Intent(OptionsActivity.this, SnakeGame.class));
         });
     }
 }

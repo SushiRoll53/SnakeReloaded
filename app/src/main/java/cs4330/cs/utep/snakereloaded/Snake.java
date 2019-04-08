@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.media.AudioAttributes;
 import android.media.SoundPool;
+import android.os.Handler;
 import android.os.Vibrator;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -26,6 +27,7 @@ class Snake extends SurfaceView implements Runnable {
     private SoundPool soundPool;
     private int eat_Dot = -1;
     private int snake_crash = -1;
+    private int victory = -1;
 
     // For vibration
     private Vibrator vibrator;
@@ -57,6 +59,7 @@ class Snake extends SurfaceView implements Runnable {
 
     // Score board
     private int score;
+    private String newHighScoreDialog;
 
     // Save high score
     private SharedPreferences highScores;
@@ -79,6 +82,8 @@ class Snake extends SurfaceView implements Runnable {
     private int[] snakeColor;
     private int[] highscoreColor;
     private int[] dotColor;
+
+    Handler handler;
 
     /**
      * Snake constructor, initialize the necessary variables
@@ -111,6 +116,7 @@ class Snake extends SurfaceView implements Runnable {
         // Preload the sounds before being used
         eat_Dot = soundPool.load(context, R.raw.eat_dot, 1);
         snake_crash = soundPool.load(context, R.raw.neck_snap, 1);
+        victory = soundPool.load(context, R.raw.victory, 1);
 
         // Initialize the drawing tools
         surfaceHolder = getHolder();
@@ -145,6 +151,8 @@ class Snake extends SurfaceView implements Runnable {
 
         // Initialize vibrator
         vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+
+        handler = new Handler();
 
         // Start the snake
         startSnake();
@@ -295,10 +303,14 @@ class Snake extends SurfaceView implements Runnable {
         }
         moveSnake();
         if (isGameOver()) {
+            // To check if there is a new High score
+            newHighScoreDialog = "Final score: "+score;
             // Play game over sound
             soundPool.play(snake_crash, 1, 1, 0, 0, 1);
             vibrator.vibrate(500);
             if(score > highScore) {
+                soundPool.play(victory, 1,1,0,0,1);
+                newHighScoreDialog = "NEW HIGH SCORE: "+score+"!";
                 SharedPreferences.Editor editor = highScores.edit();
                 if(difficulty == 1000)
                     editor.putInt("easy", score);
@@ -309,7 +321,32 @@ class Snake extends SurfaceView implements Runnable {
 
                 editor.commit();
             }
-            startSnake();
+
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    pause();
+                    new AlertDialog.Builder(context)
+                            .setTitle("Game over!")
+                            .setMessage(newHighScoreDialog+"\nDo you want to keep playing?")
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    resume();
+                                    startSnake();
+                                }
+                            })
+                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Intent quit = new Intent(context, MainActivity.class);
+                                    context.startActivity(quit);
+                                }
+                            })
+                            .setCancelable(false)
+                            .show();
+                }
+            });
         }
     }
 
@@ -427,6 +464,7 @@ class Snake extends SurfaceView implements Runnable {
                                     context.startActivity(quit);
                                 }
                             })
+                            .setCancelable(false)
                             .show();
                 }
                 break;
