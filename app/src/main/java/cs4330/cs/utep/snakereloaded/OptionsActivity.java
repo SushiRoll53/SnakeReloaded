@@ -21,6 +21,8 @@ public class OptionsActivity extends Activity {
 
     Button back;
     Button play;
+    Button sound;
+    String soundState;
 
     SharedPreferences settings;
 
@@ -39,12 +41,14 @@ public class OptionsActivity extends Activity {
 
         back = findViewById(R.id.back);
         play = findViewById(R.id.play);
+        sound = findViewById(R.id.sound);
 
         TextView difTittle = findViewById(R.id.difficulty);
         TextView theTittle = findViewById(R.id.theme);
 
         long difficulty = settings.getLong("difficulty", 1000);
         String theme = settings.getString("theme", "colorful");
+        soundState = settings.getString("soundState", "ON");
 
         // Disable the current difficulty
         if(difficulty == 1000)
@@ -73,6 +77,9 @@ public class OptionsActivity extends Activity {
             difTittle.setTextColor(Color.argb(255,0,0,0));
             theTittle.setTextColor(Color.argb(255,0,0,0));
         }
+
+        if(soundState.equalsIgnoreCase("OFF"))
+            sound.setText("Sound: OFF");
 
         SharedPreferences.Editor editor = settings.edit();
 
@@ -144,5 +151,21 @@ public class OptionsActivity extends Activity {
         play.setOnClickListener(view ->{
             startActivity(new Intent(OptionsActivity.this, SnakeGame.class));
         });
+
+        sound.setOnClickListener(view ->{
+            if(soundState.equalsIgnoreCase("ON")){
+                sound.setText("Sound: OFF");
+                editor.putString("soundState", "OFF");
+                soundState = "OFF";
+                editor.commit();
+            }
+            else if(soundState.equalsIgnoreCase("OFF")){
+                sound.setText("Sound: ON");
+                editor.putString("soundState", "ON");
+                soundState = "ON";
+                editor.commit();
+            }
+        });
     }
+
 }

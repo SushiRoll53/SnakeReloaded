@@ -68,6 +68,7 @@ class Snake extends SurfaceView implements Runnable {
     // settings
     private SharedPreferences settings;
     private String theme;
+    private String soundState;
 
     // Is snake moving?
     private volatile boolean isPlaying;
@@ -113,10 +114,6 @@ class Snake extends SurfaceView implements Runnable {
                 .setMaxStreams(10)
                 .setAudioAttributes(atributes)
                 .build();
-        // Preload the sounds before being used
-        eat_Dot = soundPool.load(context, R.raw.eat_dot, 1);
-        snake_crash = soundPool.load(context, R.raw.neck_snap, 1);
-        victory = soundPool.load(context, R.raw.victory, 1);
 
         // Initialize the drawing tools
         surfaceHolder = getHolder();
@@ -130,6 +127,14 @@ class Snake extends SurfaceView implements Runnable {
         settings = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
         difficulty = settings.getLong("difficulty", 1000);
         theme = settings.getString("theme", "colorful");
+
+        soundState = settings.getString("soundState", "ON");
+        // Preload the sounds before being used
+        if(soundState.equalsIgnoreCase("ON")) {
+            eat_Dot = soundPool.load(context, R.raw.eat_dot, 1);
+            snake_crash = soundPool.load(context, R.raw.neck_snap, 1);
+            victory = soundPool.load(context, R.raw.victory, 1);
+        }
 
         // Set theme
         backgroudColor = new int[3];
@@ -197,6 +202,9 @@ class Snake extends SurfaceView implements Runnable {
         snakeLength = 2;
         snakeXs[0] = NUM_BLOCKS_WIDE / 2;
         snakeYs[0] = numBlocksHigh / 2;
+
+        // Reset movement
+        heading = moveset.RIGHT;
 
         // Start dot attributes
         spawnDot();
